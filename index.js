@@ -51,4 +51,5 @@ async function checkAvail(page, shop) {
   const name = title.slice(0, 35);
   if (available) console.log(`IN STOCK FOR ${price}: ${name}`);
   else console.log(`Unavailable: ${name}`);
+  checkAvail(page, shop);
 }
