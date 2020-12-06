@@ -24,23 +24,31 @@ const URLS = {
     ],
   });
 
-  const openPages = {};
-
   for (let shop in URLS) {
-    console.log(`---- ${shop} ----`);
-    openPages[shop] = [];
     for (let url of URLS[shop]) {
-      console.log(url);
-      let page = await browser.newPage();
-      await page.goto(url, { waitUntil: "load", timeout: 30000 });
-      openPages[shop].push(page);
-      await page.reload();
-      const html = await page.evaluate(() => document.body.innerHTML);
-      if (shop == "amazon") await parse.amazon(html);
-      // setInterval here
-      // checkAvail(page);
+      openPage(browser, url)
+        .then((page) => {
+          console.log(`Finished loading ${url}`);
+          checkAvail(page, shop);
+        })
+        .catch((err) => {
+          console.log(`Error retrieving ${url}: ${err}`);
+        });
     }
   }
 })();
 
-async function checkAvailability() {}
+async function openPage(browser, url) {
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "load", timeout: 30000 });
+  return page;
+}
+
+async function checkAvail(page, shop) {
+  await page.reload();
+  const html = await page.evaluate(() => document.body.innerHTML);
+  const { title, price, available } = await parse[shop](html);
+  const name = title.slice(0, 35);
+  if (available) console.log(`IN STOCK FOR ${price}: ${name}`);
+  else console.log(`Unavailable: ${name}`);
+}
