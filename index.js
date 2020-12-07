@@ -1,13 +1,6 @@
 const puppeteer = require("puppeteer");
 const parse = require("./parse");
-
-const URLS = {
-  amazon: [
-    "https://www.amazon.co.uk/GoPro-HERO-Black-Waterproof-Stabilization/dp/B08G2HBBB6",
-    "https://www.amazon.co.uk/PlayStation-9395003-5-Console/dp/B08H95Y452",
-    "https://www.amazon.co.uk/PlayStation-9395003-5-Console/dp/B08H97NYGP",
-  ],
-};
+const URLS = require("./urls");
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -45,11 +38,11 @@ async function openPage(browser, url) {
 }
 
 async function checkAvail(page, shop) {
-  await page.reload();
-  const html = await page.evaluate(() => document.body.innerHTML);
-  const { title, price, available } = await parse[shop](html);
-  const name = title.slice(0, 35);
-  if (available) console.log(`IN STOCK FOR ${price}: ${name}`);
-  else console.log(`Unavailable: ${name}`);
-  checkAvail(page, shop);
+  while (true) {
+    await page.reload();
+    const { title, price, available } = await parse[shop](page);
+    if (available)
+      console.log(`IN STOCK at ${shop} (£${price}): ${title.slice(0, 35)}`);
+    // consider adding some delay here (based on the shop)
+  }
 }
