@@ -18,6 +18,10 @@ const os = require("os");
     ],
   };
 
+  // a workaround for ARM based architectures
+  // puppeteer does not work out-of-the box
+  // but it can be fixed!
+  // check if your path to chromium browser matches this
   if (os.arch() === "arm") options.executablePath = "/usr/bin/chromium-browser";
 
   const browser = await puppeteer.launch(options);
@@ -50,7 +54,7 @@ async function openPage(browser, url) {
 }
 
 async function checkAvailability(page, shop, url) {
-  let lastState = false; // we assume the item is not available
+  let lastState = false; // we assume the item is not available at first
   while (true) {
     try {
       await page.reload();
