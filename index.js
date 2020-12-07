@@ -27,7 +27,7 @@ const os = require("os");
       openPage(browser, url)
         .then((page) => {
           console.log(`Finished loading ${url}`);
-          checkAvail(page, shop);
+          checkAvailability(page, shop, url);
         })
         .catch((err) => {
           console.log(`Error retrieving ${url}: ${err}`);
@@ -49,23 +49,62 @@ async function openPage(browser, url) {
   }
 }
 
-async function checkAvail(page, shop) {
+async function checkAvailability(page, shop, url) {
+  let lastState = false; // we assume the item is not available
   while (true) {
     try {
       await page.reload();
-      const { title, price, available } = await parse[shop](page);
-      // action when the item is available - customize here
-      if (available) {
-        console.log(
-          "\x1b[33m%s\x1b[0m",
-          `>>>> IN STOCK at ${shop} (£${price}): "${title.slice(0, 35)}"`
-        );
-        return; // stop checking the item
-      } else console.log(`"${title.slice(0, 35)}" not in stock at ${shop}`);
+      const item = await parse[shop](page);
+      const { available } = item;
+      const timestamp = new Date().toISOString();
+      const details = { item, shop, url, timestamp };
+      if (lastState != available) {
+        lastState = available;
+        if (available) becameAvailable(details);
+        else becameUnavailable(details);
+      } else hasNotChanged(details);
       // consider adding some delay here
       // otherwise we will keep refreshing as soon as possible
     } catch (e) {
       console.log(e);
     }
   }
+}
+
+// customize the actions below
+// logging on the console by default
+
+function becameAvailable(details) {
+  const { item, shop, url, timestamp } = details;
+  const { title, price } = item;
+  console.log(
+    // green text
+    "\x1b[32m",
+    `${timestamp}: "${title.slice(
+      0,
+      35
+    )}" BACK IN STOCK at ${shop} for £${price}: ${url}`,
+    "\x1b[0m"
+  );
+}
+
+function becameUnavailable(details) {
+  const { item, shop, url, timestamp } = details;
+  const { title, price } = item;
+  console.log(
+    // red text
+    "\x1b[31m",
+    `${timestamp}: "${title.slice(0, 35)}" not in stock at ${shop} anymore`,
+    "\x1b[0m"
+  );
+}
+
+function hasNotChanged(details) {
+  const { item, shop, url, timestamp } = details;
+  const { title, price, available } = item;
+  console.log(
+    `${timestamp}: still${
+      available ? "" : " not"
+    } in stock at ${shop} "${title.slice(0, 35)}"`
+  );
 }
