@@ -14,6 +14,7 @@ const os = require("os");
       "--no-sandbox",
       "--no-zygote",
       "--single-process",
+      "--disable-accelerated-2d-canvas",
       // '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X   10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0    Safari/537.36"',
     ],
   };
@@ -41,10 +42,22 @@ const os = require("os");
 })();
 
 async function openPage(browser, url) {
+  const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(60000);
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    if (
+      req.resourceType() == "stylesheet" ||
+      req.resourceType() == "font" ||
+      req.resourceType() == "image"
+    ) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
   while (true) {
     try {
-      const page = await browser.newPage();
-      page.setDefaultNavigationTimeout(60000);
       await page.goto(url, { waitUntil: "load" });
       return page;
     } catch (e) {
