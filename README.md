@@ -32,13 +32,11 @@ I recommend using a **VPN**, just in case...
 
 5. Modify the source code to your preferences
 
-   Edit the **index.js** to performa an action when the item is available. It's up to you what you want to do with it, for example: post a Tweet, send an email, or buy the item instantly.
+   Edit the **config.js** file to:
 
-   There are three functions you can customize: **becameAvailable**, **becameUnavailable** and **hasNotChanged**. Each one can do a different thing.
+   - add shops and links to items you're interested in. Shop names must match the function names in **parse.js**. Currently only Amazon is supported. Add support for more online shops by editing the **parse.js** file.
 
-   Add support for more online shops by editing the **parse.js** file.
-
-   Add shops and links to **urls.js** for the items you're interested in. Shop names must match the function names in **parse.js**. Currently only Amazon is supported.
+   - perform an action when the item is available. It's up to you what you want to do with it, for example: post a Tweet, send an email, or buy the item instantly. There are three functions you can customize: **becameAvailable**, **becameUnavailable** and **hasNotChanged**.
 
 6. Run the app:
 

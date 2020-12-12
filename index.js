@@ -1,7 +1,12 @@
 const puppeteer = require("puppeteer");
 const parse = require("./parse");
-const URLS = require("./urls");
 const os = require("os");
+const {
+  URLS,
+  becameAvailable,
+  becameUnavailable,
+  hasNotChanged,
+} = require("./config");
 
 (async () => {
   const options = {
@@ -86,42 +91,4 @@ async function checkAvailability(page, shop, url) {
       console.log(e);
     }
   }
-}
-
-// customize the actions below
-// logging on the console by default
-
-function becameAvailable(details) {
-  const { item, shop, url, timestamp } = details;
-  const { title, price } = item;
-  console.log(
-    // green text
-    "\x1b[32m",
-    `${timestamp}: "${title.slice(
-      0,
-      35
-    )}" BACK IN STOCK at ${shop} for £${price}: ${url}`,
-    "\x1b[0m"
-  );
-}
-
-function becameUnavailable(details) {
-  const { item, shop, url, timestamp } = details;
-  const { title, price } = item;
-  console.log(
-    // red text
-    "\x1b[31m",
-    `${timestamp}: "${title.slice(0, 35)}" not in stock at ${shop} anymore`,
-    "\x1b[0m"
-  );
-}
-
-function hasNotChanged(details) {
-  const { item, shop, url, timestamp } = details;
-  const { title, price, available } = item;
-  console.log(
-    `${timestamp}: still${
-      available ? "" : " not"
-    } in stock at ${shop} "${title.slice(0, 35)}"`
-  );
 }
